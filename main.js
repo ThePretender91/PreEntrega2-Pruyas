@@ -1,4 +1,4 @@
-// Creacion de array para almacenar la transaccion
+//Array para almacenar la transaccion
 const transaccion = [];
 
 const ordenarEstrellas = () => {
@@ -13,7 +13,7 @@ const ordenarDuracion = () => {
 
 const mostrarSeleccionOrden = () => {
     const carteleraOrdenada = peliculas.map(pelicula => {
-        return '*. '+ pelicula.nombre + ' | Duracion: '+ pelicula.duracion + ' | Estrellas: '+ pelicula.estrellas
+        return '*. '+ pelicula.nombre + ' || Duracion: '+ pelicula.duracion + ' Min | Estrellas: '+ pelicula.estrellas
     });
     console.log('Cartelera: \n\n' + carteleraOrdenada.join('\n'));
     comprarEntrada(carteleraOrdenada);
@@ -25,7 +25,6 @@ const comprarEntrada = (cartelera) => {
     let seleccionCorrecta;
     let fechaCompleta = '';
 
-    console.log (cartelera)
     do {
         seleccionPelicula = prompt('¿Qué pelicula desea ver?:\n\n'+ cartelera.join('\n') + '\n\n[Ingrese el nombre completo de la pelicula]');
 
@@ -55,7 +54,7 @@ const comprarEntrada = (cartelera) => {
         }
     } while (seleccionCorrecta);
 
-    confirmarTransaccion();
+    confirmarTransaccion(seleccionPelicula);
 };
 
 const seleccionarFecha = () => {
@@ -101,19 +100,25 @@ const agregarTransaccion = (pelicula, cantidad,fecha) => {
     console.log(transaccion)
 };
 
-const eliminarEntrada = (compra, cantidad) => {
-    if (cantidad > compra[0].cantidad) {
-        compra.splice(0, 1);
-    } else if (compra[0].cantidad > 1) {
-        compra[0].cantidad -= cantidad;
-    } else {
-        compra.splice(0, 1);
+const eliminarEntrada = (seleccionPelicula, cantidad) => {
+    transaccion.forEach((pelicula, index) => {
+        if (pelicula.nombre.toLowerCase() === seleccionPelicula.toLowerCase()) {
+            if (cantidad > pelicula.cantidad) {
+                transaccion.splice(index, 1);
+            } else if (pelicula.cantidad > 1) {
+                pelicula.cantidad -= cantidad;
+            } else {
+                transaccion.splice(index, 1);
+        }
     }
+    })   
     
-    confirmarTransaccion()
+    confirmarTransaccion(seleccionPelicula)
 };
 
-const confirmarTransaccion = () => {
+const confirmarTransaccion = (seleccionPelicula) => {
+    let cantidadEliminar = 0;
+
     const informeTransaccion = transaccion.map(pelicula => {
         return pelicula.nombre  + '\nFecha: '+ pelicula.fecha + '\nCantidad Entradas: '+ pelicula.cantidad + '\nPrecio por Entrada: '+ pelicula.precio
     });
@@ -129,9 +134,11 @@ const confirmarTransaccion = () => {
         if (confirmar) {
             finalizarCompra(informeTransaccion);
         } else {
-            let cantidadEliminar = parseInt(prompt('Ingrese el numero de entradas a eliminar:'));
-            console.log (cantidadEliminar);
-            eliminarEntrada(transaccion, cantidadEliminar);
+            do {
+                cantidadEliminar = parseInt(prompt('Ingrese el numero de entradas a eliminar:'));
+            }while (Number.isNaN(cantidadEliminar) || cantidadEliminar < 0);
+
+            eliminarEntrada(seleccionPelicula, cantidadEliminar);
         }
     }
 };
@@ -139,19 +146,18 @@ const confirmarTransaccion = () => {
 const finalizarCompra = (informe) => {
     const precioParcial = transaccion.reduce((acc, elemento) => acc + (elemento.precio * elemento.cantidad), 0);
 
-    const precioTotal = verificarDescuento(transaccion,precioParcial);
+    const precioTotal = verificarDescuento(precioParcial);
 
-    alert('DATOS DE LA COMPRA\n==============================\n' + informe.join('\n') + '\n\nEl total de la compra es: ' + precioTotal);
+    alert('DATOS DE LA COMPRA\n==============================\n' + informe.join('\n') + '\n\nEl total de la compra es: $' + precioTotal);
 };
 
-const verificarDescuento = (transaccion,precio) => {
-    let fechaFix = '';
+const verificarDescuento = (precio) => {
     let precioDescuento = 0;
     let codigoDescuento = '';
 
-    fechaFix = transaccion[0].fecha.split('.');
-
-    if (fechaFix[0] === 'LUNES' || fechaFix[0] === 'MIERCOLES' || fechaFix[0] === 'VIERNES'){
+    const fechaFlag = transaccion.some ((pelicula) => pelicula.fecha.includes('LUNES') || pelicula.fecha.includes('MIERCOLES') || pelicula.fecha.includes('VIERNES'));
+    
+    if (fechaFlag){
         alert('Usted ha seleccionado una fecha con descuento.\nSe aplicara un 15% de descuento.');
         precioDescuento = precio * 0.85;
     }
