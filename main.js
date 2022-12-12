@@ -28,6 +28,11 @@ const comprarEntrada = (cartelera) => {
     do {
         seleccionPelicula = prompt('¿Qué pelicula desea ver?:\n\n'+ cartelera.join('\n') + '\n\n[Ingrese el nombre completo de la pelicula]');
 
+        if (seleccionPelicula === null || seleccionPelicula === '') {
+            alert('La pelicula no se encuentra en la cartelera.\nIngrese un nombre correcto de pelicula');
+            comprarEntrada(cartelera);
+        }
+
         while (Number.isNaN(cantidadEntradas) || cantidadEntradas <= 0) {
             cantidadEntradas = parseInt(prompt('¿Cuántas entradas desea comprar?\n\nCada uno de los ascientos tienen un valor de $800'));
 
@@ -49,8 +54,7 @@ const comprarEntrada = (cartelera) => {
             seleccionCorrecta = false;
         } else {
             alert('La pelicula no se encuentra en la cartelera. Ingrese un nombre correcto de pelicula');
-            seleccionCorrecta = true;
-            cantidadEntradas = 0;
+            comprarEntrada(cartelera);
         }
     } while (seleccionCorrecta);
 
